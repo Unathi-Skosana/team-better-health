@@ -1,6 +1,6 @@
 {
   "created_at": "2025-09-25T10:19:43.815464",
-  "total_reports": 2,
+  "total_reports": 6,
   "reports": [
     {
       "id": "2cbbd55a",
@@ -33,7 +33,71 @@
         "J44.1"
       ],
       "summary": "shortness of breath and chest tightness"
+    },
+    {
+      "id": "4ea75c01",
+      "created_at": "2025-09-25T12:38:36.325570",
+      "filename": "report_20250925_123836_4ea75c01.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_123836_4ea75c01.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "G43.909",
+        "R51",
+        "G44.1"
+      ],
+      "summary": "i have headache"
+    },
+    {
+      "id": "ada4f762",
+      "created_at": "2025-09-25T13:24:43.296368",
+      "filename": "report_20250925_132443_ada4f762.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_132443_ada4f762.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "R53.83",
+        "R50.9",
+        "J00",
+        "A49.9",
+        "R53.1"
+      ],
+      "summary": "i have fatigue and fever"
+    },
+    {
+      "id": "2111c923",
+      "created_at": "2025-09-25T13:41:04.050059",
+      "filename": "report_20250925_134104_2111c923.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_134104_2111c923.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "R06.02",
+        "I50.9",
+        "J44.1"
+      ],
+      "summary": "shortness of breath and chest tightness"
+    },
+    {
+      "id": "7a037916",
+      "created_at": "2025-09-25T13:53:50.163045",
+      "filename": "report_20250925_135350_7a037916.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_135350_7a037916.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "J00",
+        "A49.9",
+        "R53.83",
+        "R53.1",
+        "R50.9"
+      ],
+      "summary": "i have fatigue and fever"
     }
   ],
-  "last_updated": "2025-09-25T10:37:57.181220"
+  "last_updated": "2025-09-25T13:53:50.163045"
 }
