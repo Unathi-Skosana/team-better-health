@@ -1,0 +1,24 @@
+{
+  "created_at": "2025-09-25T10:19:43.815464",
+  "total_reports": 1,
+  "reports": [
+    {
+      "id": "2cbbd55a",
+      "created_at": "2025-09-25T10:23:40.763973",
+      "filename": "report_20250925_102340_2cbbd55a.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_102340_2cbbd55a.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "J00",
+        "R53.83",
+        "R53.1",
+        "R50.9",
+        "R51"
+      ],
+      "summary": "fatigue and fever and headache"
+    }
+  ],
+  "last_updated": "2025-09-25T10:23:40.763973"
+}
