@@ -31,7 +31,7 @@ interface GeoLocationArtifactProps {
   data?: ProvinceData[]
 }
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw"
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
 const DISEASE_COLORS = {
   hypertension: "#ef4444",
@@ -252,9 +252,25 @@ export function GeoLocationArtifact({
                 zoom: 5
               }}
               style={{ width: "100%", height: "100%" }}
+              mapStyle="mapbox://styles/vacwork/cm8ll4bbf00bo01s52yhv8den"
               onMouseMove={onHover}
               onClick={onClick}
               interactiveLayerIds={["data-fill"]}
+              projection={{ name: 'mercator' }}
+                reuseMaps={true}
+                scrollZoom={true}
+                boxZoom={true}
+                dragRotate={false}
+                dragPan={true}
+                keyboard={true}
+                doubleClickZoom={true}
+                touchZoomRotate={false}
+                touchPitch={false}
+                minZoom={0}
+                maxZoom={20}
+                minPitch={0}
+                maxPitch={0}
+
             >
               <NavigationControl position="top-left" />
               <ScaleControl position="bottom-left" />

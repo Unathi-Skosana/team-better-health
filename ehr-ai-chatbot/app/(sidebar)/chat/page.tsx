@@ -8,7 +8,7 @@ import React from "react"
 import { ChartArtifact } from "@/components/chart-artifact"
 import { GeoLocationArtifact } from "@/components/geolocation-artifact"
 import { ClinicMisdiagnosisMap } from "@/components/clinic-misdiagnosis-map"
-import { ThinkingSkeleton, AnalyzingSkeleton, CreatingChartSkeleton } from "@/components/loading-skeletons"
+import { Loader } from "@/components/ai-elements/loader"
 import type { EHRChatMessage } from "../../api/chat/route"
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation"
 import { Message, MessageContent } from "@/components/ai-elements/message"
@@ -46,19 +46,19 @@ export default function ChatPage() {
   const [useWebSearch, setUseWebSearch] = useState(false)
 
   const medicalSuggestions = [
-    "Show me a glucose chart for the last month",
-    "Create a blood pressure trend chart",
-    "What are the symptoms of diabetes?",
-    "Show the most prevalent diseases by province",
-    "Display hypertension rates across South African provinces",
-    "Create a map of diabetes prevalence by region",
-    "Show clinics and hospitals with prevalent misdiagnosis rates",
-    "What are the current guidelines for hypertension management?",
-    "Tell me about common drug interactions with warfarin",
-    "What are the side effects of metformin?",
-    "Explain diabetes management protocols",
-    "What are the symptoms of heart failure?",
-    "Show tuberculosis distribution by province",
+    "Show disease prevalence trends across South African provinces",
+    "Create a map of hypertension rates by region",
+    "Display diabetes distribution patterns nationwide",
+    "Analyze tuberculosis hotspots by province",
+    "Show clinic misdiagnosis rates across regions",
+    "Compare cardiovascular disease prevalence by province",
+    "Map obesity rates across South African regions",
+    "Analyze healthcare facility performance by province",
+    "Show emerging disease trends by geographic region",
+    "Create epidemiological maps for disease surveillance",
+    "Compare provincial health outcomes and indicators",
+    "Display regional healthcare resource allocation",
+    "Analyze disease burden patterns nationwide",
   ]
 
   const models = [
@@ -100,10 +100,16 @@ export default function ChatPage() {
   }
 
   const isLoading = status === "streaming"
+  const isSubmitted = status === "submitted"
   const hasError = status === "error"
 
   const getLoadingState = () => {
-    if (!isLoading) return null
+    if (!isLoading && !isSubmitted) return null
+
+    // Show thinking state when submitted (before streaming starts)
+    if (isSubmitted) {
+      return "thinking"
+    }
 
     const lastMessage = messages[messages.length - 1]
     if (!lastMessage || lastMessage.role === "user") {
@@ -126,8 +132,8 @@ export default function ChatPage() {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🤖</span>
-              <span className="font-semibold">AI Chat Assistant</span>
+              <span className="text-2xl">🏥</span>
+              <span className="font-semibold">Health Analytics Assistant</span>
             </div>
             <div className="text-sm text-muted-foreground">
               {messages.length === 0 ? "Ready to help" : `${messages.length} messages`}
@@ -159,16 +165,16 @@ export default function ChatPage() {
           <div className="px-4 pb-4">
             <div className="flex gap-2 flex-wrap">
               <Badge variant="secondary" className="text-xs">
-                Medical Expert
+                Regional Health Analyst
               </Badge>
               <Badge variant="secondary" className="text-xs">
-                EHR Specialist
+                Epidemiological Expert
               </Badge>
               <Badge variant="secondary" className="text-xs">
-                Clinical Assistant
+                Country-wide Trends
               </Badge>
               <Badge variant="secondary" className="text-xs">
-                HIPAA Compliant
+                Provincial Analytics
               </Badge>
             </div>
           </div>
@@ -192,12 +198,12 @@ export default function ChatPage() {
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center max-w-2xl w-full px-4">
                   <div className="text-muted-foreground mb-6">
-                    Welcome to your AI EHR Assistant. I can help you with medical charts, geographic health data, and clinical insights. Try asking me to create visualizations or analyze health trends!
+                    Welcome to your AI Health Analytics Assistant. I specialize in country-wide health trend analysis, regional epidemiological insights, and provincial healthcare performance metrics. Perfect for doctors and regional administrators analyzing nationwide health patterns and disease surveillance across South Africa.
                   </div>
 
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Data Visualization:</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Regional Health Analysis:</h3>
                       <Suggestions>
                         {medicalSuggestions.slice(0, 4).map((suggestion) => (
                           <Suggestion
@@ -210,7 +216,7 @@ export default function ChatPage() {
                       </Suggestions>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Clinical Questions:</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Epidemiological Insights:</h3>
                       <Suggestions>
                         {medicalSuggestions.slice(4, 8).map((suggestion) => (
                           <Suggestion
@@ -241,14 +247,23 @@ export default function ChatPage() {
                               <div key={partIndex} className="mb-4">
                                 <div className="bg-muted/50 border rounded-lg p-4">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
+                                    <Loader size={16} />
                                     <div className="text-foreground font-medium">
                                       {part.type === "tool-createClinicMisdiagnosis" ? "Creating clinic misdiagnosis map..." : "Creating interactive map..."}
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            ) : <CreatingChartSkeleton key={partIndex} />
+                            ) : (
+                              <div key={partIndex} className="mb-4">
+                                <div className="bg-muted/50 border rounded-lg p-4">
+                                  <div className="flex items-center gap-3">
+                                    <Loader size={16} />
+                                    <div className="text-foreground font-medium">Creating chart...</div>
+                                  </div>
+                                </div>
+                              </div>
+                            )
                           case "output-available":
                             if (!part.output || typeof part.output === 'string') {
                               return (
@@ -317,14 +332,23 @@ export default function ChatPage() {
                               <div key={partIndex} className="mb-4">
                                 <div className="bg-muted/50 border rounded-lg p-4">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
+                                    <Loader size={16} />
                                     <div className="text-foreground font-medium">
                                       {part.type === "tool-createClinicMisdiagnosis" ? "Creating clinic misdiagnosis map..." : "Creating interactive map..."}
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            ) : <CreatingChartSkeleton key={partIndex} />
+                            ) : (
+                              <div key={partIndex} className="mb-4">
+                                <div className="bg-muted/50 border rounded-lg p-4">
+                                  <div className="flex items-center gap-3">
+                                    <Loader size={16} />
+                                    <div className="text-foreground font-medium">Creating chart...</div>
+                                  </div>
+                                </div>
+                              </div>
+                            )
                         }
                       }
                       return null
@@ -334,9 +358,36 @@ export default function ChatPage() {
               )
             })}
 
-            {loadingState === "thinking" && <ThinkingSkeleton />}
-            {loadingState === "analyzing" && <AnalyzingSkeleton />}
-            {loadingState === "creating-chart" && <CreatingChartSkeleton />}
+            {loadingState === "thinking" && (
+              <Message from="assistant">
+                <MessageContent>
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <Loader size={16} />
+                    <span className="text-sm font-medium">Thinking...</span>
+                  </div>
+                </MessageContent>
+              </Message>
+            )}
+            {loadingState === "analyzing" && (
+              <Message from="assistant">
+                <MessageContent>
+                  <div className="flex items-center gap-3 text-blue-600">
+                    <Loader size={16} />
+                    <span className="text-sm font-medium">Analyzing medical data...</span>
+                  </div>
+                </MessageContent>
+              </Message>
+            )}
+            {loadingState === "creating-chart" && (
+              <Message from="assistant">
+                <MessageContent>
+                  <div className="flex items-center gap-3 text-green-600 mb-4">
+                    <Loader size={16} />
+                    <span className="text-sm font-medium">Creating visualization...</span>
+                  </div>
+                </MessageContent>
+              </Message>
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
@@ -370,7 +421,7 @@ export default function ChatPage() {
             <PromptInputBody>
               <PromptInputTextarea
                 name="message"
-                placeholder="Ask about patient care, upload medical documents, or get clinical insights..."
+                placeholder="Analyze regional health trends, create epidemiological maps, or explore country-wide disease patterns..."
                 disabled={isLoading}
               />
             </PromptInputBody>
@@ -384,12 +435,12 @@ export default function ChatPage() {
                 </PromptInputActionMenu>
               </PromptInputTools>
 
-              <PromptInputSubmit status={isLoading ? "in_progress" : hasError ? "error" : "ready"} />
+              <PromptInputSubmit status={isLoading || isSubmitted ? "in_progress" : hasError ? "error" : "ready"} />
             </PromptInputToolbar>
           </PromptInput>
 
           <p className="text-xs text-muted-foreground mt-3 text-center">
-            Press Enter to send • Try: "Show me a glucose chart" or "Create a map of diabetes prevalence"
+            Press Enter to send • Try: "Show disease prevalence by province" or "Analyze regional health trends"
           </p>
         </div>
       </div>

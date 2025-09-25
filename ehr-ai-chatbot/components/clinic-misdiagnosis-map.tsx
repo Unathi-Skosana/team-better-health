@@ -30,8 +30,7 @@ interface ClinicMisdiagnosisMapProps {
   data?: ClinicData[]
 }
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw"
-
+  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 const FACILITY_TYPES = {
   clinic: { label: "Clinic", icon: "🏥", color: "#3b82f6" },
   hospital: { label: "Hospital", icon: "🏥", color: "#ef4444" },
@@ -304,10 +303,25 @@ export function ClinicMisdiagnosisMap({
                 zoom: 5.5
               }}
               style={{ width: "100%", height: "100%" }}
-              mapStyle="mapbox://styles/mapbox/streets-v12"
+              mapStyle="mapbox://styles/vacwork/cm8ll4bbf00bo01s52yhv8den"
               onMouseMove={onHover}
               onClick={onClick}
               interactiveLayerIds={["clinic-pins"]}
+              projection={{ name: 'mercator' }}
+        reuseMaps={true}
+        scrollZoom={true}
+        boxZoom={true}
+        dragRotate={false}
+        dragPan={true}
+        keyboard={true}
+        doubleClickZoom={true}
+        touchZoomRotate={false}
+        touchPitch={false}
+        minZoom={0}
+        maxZoom={20}
+        minPitch={0}
+        maxPitch={0}
+
             >
               <NavigationControl position="top-left" />
               <ScaleControl position="bottom-left" />

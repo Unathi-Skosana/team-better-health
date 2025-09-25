@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation"
 const navigationItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: HomeIcon,
     description: "Overview and quick actions",
   },
