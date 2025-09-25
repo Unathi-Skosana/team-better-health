@@ -97,8 +97,195 @@ const createChartTool = tool({
   },
 })
 
+const createGeoLocationTool = tool({
+  description:
+    "Create interactive maps showing disease prevalence by province in South Africa. Use this when users ask for geographic data visualization, provincial disease statistics, or regional health analysis.",
+  inputSchema: z.object({
+    title: z.string().describe("Map title"),
+    diseaseType: z.enum(["hypertension", "diabetes", "heart_disease", "obesity", "tuberculosis"]).describe("Type of disease to visualize"),
+    description: z.string().optional().describe("Map description or clinical context"),
+  }),
+  async *execute({ title, diseaseType, description }) {
+    console.log("[v0] Tool createGeoLocation executed with:", {
+      title,
+      diseaseType,
+      description,
+    })
+
+    yield { status: "analyzing", message: "Analyzing geographic health data..." }
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    yield { status: "processing", message: "Processing provincial statistics..." }
+    await new Promise((resolve) => setTimeout(resolve, 600))
+
+    yield { status: "generating", message: "Generating interactive map..." }
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    // Generate realistic South African provincial disease data
+    const provincesData = [
+      {
+        name: "Western Cape",
+        code: "WC",
+        population: 7020000,
+        diseases: {
+          hypertension: 28.5,
+          diabetes: 12.3,
+          heart_disease: 8.7,
+          obesity: 35.2,
+          tuberculosis: 4.1
+        }
+      },
+      {
+        name: "Eastern Cape",
+        code: "EC", 
+        population: 6650000,
+        diseases: {
+          hypertension: 32.1,
+          diabetes: 15.8,
+          heart_disease: 12.3,
+          obesity: 42.1,
+          tuberculosis: 6.8
+        }
+      },
+      {
+        name: "Northern Cape",
+        code: "NC",
+        population: 1200000,
+        diseases: {
+          hypertension: 25.8,
+          diabetes: 9.2,
+          heart_disease: 6.4,
+          obesity: 28.7,
+          tuberculosis: 2.9
+        }
+      },
+      {
+        name: "Free State",
+        code: "FS",
+        population: 2900000,
+        diseases: {
+          hypertension: 30.2,
+          diabetes: 13.5,
+          heart_disease: 9.8,
+          obesity: 38.9,
+          tuberculosis: 5.2
+        }
+      },
+      {
+        name: "KwaZulu-Natal",
+        code: "KZN",
+        population: 11400000,
+        diseases: {
+          hypertension: 35.7,
+          diabetes: 18.2,
+          heart_disease: 14.1,
+          obesity: 45.3,
+          tuberculosis: 8.9
+        }
+      },
+      {
+        name: "North West",
+        code: "NW",
+        population: 4100000,
+        diseases: {
+          hypertension: 29.8,
+          diabetes: 12.1,
+          heart_disease: 8.9,
+          obesity: 36.7,
+          tuberculosis: 4.7
+        }
+      },
+      {
+        name: "Gauteng",
+        code: "GP",
+        population: 15700000,
+        diseases: {
+          hypertension: 26.4,
+          diabetes: 10.7,
+          heart_disease: 7.2,
+          obesity: 32.1,
+          tuberculosis: 3.8
+        }
+      },
+      {
+        name: "Mpumalanga",
+        code: "MP",
+        population: 4500000,
+        diseases: {
+          hypertension: 31.5,
+          diabetes: 14.3,
+          heart_disease: 10.6,
+          obesity: 39.8,
+          tuberculosis: 6.1
+        }
+      },
+      {
+        name: "Limpopo",
+        code: "LP",
+        population: 5800000,
+        diseases: {
+          hypertension: 33.9,
+          diabetes: 16.1,
+          heart_disease: 11.8,
+          obesity: 41.2,
+          tuberculosis: 7.4
+        }
+      }
+    ]
+
+    const result = {
+      mapId: `map-${Date.now()}`,
+      title: title || `${diseaseType.charAt(0).toUpperCase() + diseaseType.slice(1)} Prevalence by Province`,
+      type: "geolocation",
+      diseaseType: diseaseType,
+      description: description || `Interactive map showing ${diseaseType} prevalence across South African provinces`,
+      data: provincesData,
+    }
+
+    console.log("[v0] Tool createGeoLocation returning:", result)
+    yield result
+  },
+})
+
+const createClinicMisdiagnosisTool = tool({
+  description:
+    "Create interactive maps showing clinics and hospitals with prevalent misdiagnosis rates in South Africa. Use this when users ask about misdiagnosis rates, clinic performance, hospital quality, or healthcare facility analysis.",
+  inputSchema: z.object({
+    title: z.string().describe("Map title"),
+    description: z.string().optional().describe("Map description or clinical context"),
+  }),
+  async *execute({ title, description }) {
+    console.log("[v0] Tool createClinicMisdiagnosis executed with:", {
+      title,
+      description,
+    })
+
+    yield { status: "analyzing", message: "Analyzing clinic misdiagnosis data..." }
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    yield { status: "processing", message: "Processing healthcare facility statistics..." }
+    await new Promise((resolve) => setTimeout(resolve, 600))
+
+    yield { status: "generating", message: "Generating clinic misdiagnosis map..." }
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    // Return the clinic misdiagnosis map data
+    const result = {
+      mapId: `clinic-misdiagnosis-${Date.now()}`,
+      title: title || "Clinic Misdiagnosis Rates Across South Africa",
+      type: "clinic-misdiagnosis",
+      description: description || "Interactive map showing clinics and hospitals with prevalent misdiagnosis rates",
+    }
+
+    console.log("[v0] Tool createClinicMisdiagnosis returning:", result)
+    yield result
+  },
+})
+
 const tools = {
   createChart: createChartTool,
+  createGeoLocation: createGeoLocationTool,
+  createClinicMisdiagnosis: createClinicMisdiagnosisTool,
 } as const
 
 export type EHRChatMessage = UIMessage<never, UIDataTypes, InferUITools<typeof tools>>
@@ -151,6 +338,18 @@ IMPORTANT: When users ask for charts, graphs, or data visualization, you MUST us
 - "Display lab results over time" → Use createChart with lab data (line chart)
 - "Show patient demographics" → Use createChart with demographic data (pie/donut chart)
 - "Compare medication effectiveness" → Use createChart with comparison data (bar chart)
+
+IMPORTANT: When users ask for geographic data, provincial statistics, or regional health analysis in South Africa, you MUST use the createGeoLocation tool. Examples:
+- "Show the most prevalent diseases by province" → Use createGeoLocation with disease type
+- "Display hypertension rates across South African provinces" → Use createGeoLocation with hypertension
+- "Create a map of diabetes prevalence by region" → Use createGeoLocation with diabetes
+- "Show tuberculosis distribution by province" → Use createGeoLocation with tuberculosis
+
+IMPORTANT: When users ask about clinic performance, hospital quality, or misdiagnosis rates, you MUST use the createClinicMisdiagnosis tool. Examples:
+- "Show clinics and hospitals with prevalent misdiagnosis rates" → Use createClinicMisdiagnosis
+- "Display healthcare facilities with high misdiagnosis rates" → Use createClinicMisdiagnosis
+- "Show hospital performance regarding misdiagnosis" → Use createClinicMisdiagnosis
+- "Create a map of clinic quality based on misdiagnosis rates" → Use createClinicMisdiagnosis
 
 Chart Type Guidelines:
 - **Line/Area**: Time series data (vitals over time, lab trends)

@@ -1,0 +1,230 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Western Cape",
+        "code": "WC",
+        "population": 7020000,
+        "diseases": {
+          "hypertension": 28.5,
+          "diabetes": 12.3,
+          "heart_disease": 8.7,
+          "obesity": 35.2,
+          "tuberculosis": 4.1
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [18.0, -35.0],
+          [20.0, -35.0],
+          [20.0, -33.0],
+          [18.0, -33.0],
+          [18.0, -35.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eastern Cape",
+        "code": "EC",
+        "population": 6650000,
+        "diseases": {
+          "hypertension": 32.1,
+          "diabetes": 15.8,
+          "heart_disease": 12.3,
+          "obesity": 42.1,
+          "tuberculosis": 6.8
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [22.0, -35.0],
+          [25.0, -35.0],
+          [25.0, -33.0],
+          [22.0, -33.0],
+          [22.0, -35.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Northern Cape",
+        "code": "NC",
+        "population": 1200000,
+        "diseases": {
+          "hypertension": 25.8,
+          "diabetes": 9.2,
+          "heart_disease": 6.4,
+          "obesity": 28.7,
+          "tuberculosis": 2.9
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [16.0, -33.0],
+          [20.0, -33.0],
+          [20.0, -29.0],
+          [16.0, -29.0],
+          [16.0, -33.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Free State",
+        "code": "FS",
+        "population": 2900000,
+        "diseases": {
+          "hypertension": 30.2,
+          "diabetes": 13.5,
+          "heart_disease": 9.8,
+          "obesity": 38.9,
+          "tuberculosis": 5.2
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [24.0, -33.0],
+          [28.0, -33.0],
+          [28.0, -29.0],
+          [24.0, -29.0],
+          [24.0, -33.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "KwaZulu-Natal",
+        "code": "KZN",
+        "population": 11400000,
+        "diseases": {
+          "hypertension": 35.7,
+          "diabetes": 18.2,
+          "heart_disease": 14.1,
+          "obesity": 45.3,
+          "tuberculosis": 8.9
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [28.0, -33.0],
+          [32.0, -33.0],
+          [32.0, -29.0],
+          [28.0, -29.0],
+          [28.0, -33.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "North West",
+        "code": "NW",
+        "population": 4100000,
+        "diseases": {
+          "hypertension": 29.8,
+          "diabetes": 12.1,
+          "heart_disease": 8.9,
+          "obesity": 36.7,
+          "tuberculosis": 4.7
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [22.0, -29.0],
+          [26.0, -29.0],
+          [26.0, -25.0],
+          [22.0, -25.0],
+          [22.0, -29.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gauteng",
+        "code": "GP",
+        "population": 15700000,
+        "diseases": {
+          "hypertension": 26.4,
+          "diabetes": 10.7,
+          "heart_disease": 7.2,
+          "obesity": 32.1,
+          "tuberculosis": 3.8
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [26.0, -29.0],
+          [30.0, -29.0],
+          [30.0, -25.0],
+          [26.0, -25.0],
+          [26.0, -29.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mpumalanga",
+        "code": "MP",
+        "population": 4500000,
+        "diseases": {
+          "hypertension": 31.5,
+          "diabetes": 14.3,
+          "heart_disease": 10.6,
+          "obesity": 39.8,
+          "tuberculosis": 6.1
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [28.0, -29.0],
+          [32.0, -29.0],
+          [32.0, -25.0],
+          [28.0, -25.0],
+          [28.0, -29.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Limpopo",
+        "code": "LP",
+        "population": 5800000,
+        "diseases": {
+          "hypertension": 33.9,
+          "diabetes": 16.1,
+          "heart_disease": 11.8,
+          "obesity": 41.2,
+          "tuberculosis": 7.4
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [26.0, -25.0],
+          [30.0, -25.0],
+          [30.0, -22.0],
+          [26.0, -22.0],
+          [26.0, -25.0]
+        ]]
+      }
+    }
+  ]
+}

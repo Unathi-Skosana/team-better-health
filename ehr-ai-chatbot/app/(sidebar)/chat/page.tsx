@@ -4,9 +4,12 @@ import { DefaultChatTransport } from "ai"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import React from "react"
 import { ChartArtifact } from "@/components/chart-artifact"
+import { GeoLocationArtifact } from "@/components/geolocation-artifact"
+import { ClinicMisdiagnosisMap } from "@/components/clinic-misdiagnosis-map"
 import { ThinkingSkeleton, AnalyzingSkeleton, CreatingChartSkeleton } from "@/components/loading-skeletons"
-import type { EHRChatMessage } from "./api/chat/route"
+import type { EHRChatMessage } from "../../api/chat/route"
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation"
 import { Message, MessageContent } from "@/components/ai-elements/message"
 import {
@@ -43,14 +46,19 @@ export default function ChatPage() {
   const [useWebSearch, setUseWebSearch] = useState(false)
 
   const medicalSuggestions = [
-    "How do I create a comprehensive patient summary?",
+    "Show me a glucose chart for the last month",
+    "Create a blood pressure trend chart",
+    "What are the symptoms of diabetes?",
+    "Show the most prevalent diseases by province",
+    "Display hypertension rates across South African provinces",
+    "Create a map of diabetes prevalence by region",
+    "Show clinics and hospitals with prevalent misdiagnosis rates",
     "What are the current guidelines for hypertension management?",
     "Tell me about common drug interactions with warfarin",
     "What are the side effects of metformin?",
-    "Create a blood pressure chart for the last month",
-    "Show glucose trends over 3 months",
     "Explain diabetes management protocols",
     "What are the symptoms of heart failure?",
+    "Show tuberculosis distribution by province",
   ]
 
   const models = [
@@ -78,7 +86,6 @@ export default function ChatPage() {
       await sendMessage(
         {
           text: message.text || "Sent with attachments",
-          files: message.files,
         },
         {
           body: {
@@ -92,7 +99,7 @@ export default function ChatPage() {
     }
   }
 
-  const isLoading = status === "in_progress"
+  const isLoading = status === "streaming"
   const hasError = status === "error"
 
   const getLoadingState = () => {
@@ -103,7 +110,7 @@ export default function ChatPage() {
       return "thinking"
     }
 
-    const hasChartTool = lastMessage.parts.some((part) => part.type === "tool-createChart")
+    const hasChartTool = lastMessage.parts.some((part) => part.type === "tool-createChart" || part.type === "tool-createGeoLocation" || part.type === "tool-createClinicMisdiagnosis")
     if (hasChartTool) {
       return "creating-chart"
     }
@@ -114,7 +121,7 @@ export default function ChatPage() {
   const loadingState = getLoadingState()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
@@ -169,7 +176,7 @@ export default function ChatPage() {
       </div>
 
       {/* Chat Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {hasError && (
           <div className="mx-6 mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <div className="text-sm text-destructive font-medium">
@@ -179,18 +186,18 @@ export default function ChatPage() {
           </div>
         )}
 
-        <Conversation className="flex-1">
+        <Conversation className="flex-1 min-h-0">
           <ConversationContent>
             {messages.length === 0 && !hasError && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center max-w-2xl w-full px-4">
                   <div className="text-muted-foreground mb-6">
-                    Welcome to your AI EHR Assistant. How can I help you today?
+                    Welcome to your AI EHR Assistant. I can help you with medical charts, geographic health data, and clinical insights. Try asking me to create visualizations or analyze health trends!
                   </div>
 
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Clinical Questions:</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Data Visualization:</h3>
                       <Suggestions>
                         {medicalSuggestions.slice(0, 4).map((suggestion) => (
                           <Suggestion
@@ -203,9 +210,9 @@ export default function ChatPage() {
                       </Suggestions>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Data Visualization:</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Clinical Questions:</h3>
                       <Suggestions>
-                        {medicalSuggestions.slice(4).map((suggestion) => (
+                        {medicalSuggestions.slice(4, 8).map((suggestion) => (
                           <Suggestion
                             key={suggestion}
                             suggestion={suggestion}
@@ -222,39 +229,47 @@ export default function ChatPage() {
 
             {messages.map((message) => {
               return (
-                <Message key={message.id} from={message.role}>
+                <Message key={message.id} from={message.role === "system" ? "assistant" : message.role}>
                   <MessageContent>
                     {message.parts.map((part, partIndex) => {
                       if (part.type === "text") {
                         return <Response key={partIndex}>{part.text}</Response>
-                      } else if (part.type === "tool-createChart") {
+                      } else if (part.type === "tool-createChart" || part.type === "tool-createGeoLocation" || part.type === "tool-createClinicMisdiagnosis") {
                         switch (part.state) {
                           case "input-available":
-                            return <CreatingChartSkeleton key={partIndex} />
-                          case "partial-output":
-                            if (part.partialOutput?.status) {
-                              return (
-                                <div key={partIndex} className="mb-4">
-                                  <div className="bg-muted/50 border rounded-lg p-4">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
-                                      <div className="text-foreground font-medium">
-                                        {part.partialOutput.message || "Processing..."}
-                                      </div>
+                            return part.type === "tool-createGeoLocation" || part.type === "tool-createClinicMisdiagnosis" ? (
+                              <div key={partIndex} className="mb-4">
+                                <div className="bg-muted/50 border rounded-lg p-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-foreground font-medium">
+                                      {part.type === "tool-createClinicMisdiagnosis" ? "Creating clinic misdiagnosis map..." : "Creating interactive map..."}
                                     </div>
                                   </div>
                                 </div>
-                              )
-                            }
-                            return <CreatingChartSkeleton key={partIndex} />
+                              </div>
+                            ) : <CreatingChartSkeleton key={partIndex} />
                           case "output-available":
-                            if (!part.output) {
+                            if (!part.output || typeof part.output === 'string') {
                               return (
                                 <div
                                   key={partIndex}
                                   className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
                                 >
-                                  <div className="text-destructive">Error: Chart data not available</div>
+                                  <div className="text-destructive">Error: Chart/Map data not available</div>
+                                </div>
+                              )
+                            }
+
+                            // Type guard for output
+                            const output = part.output as any
+                            if (!output || typeof output !== 'object') {
+                              return (
+                                <div
+                                  key={partIndex}
+                                  className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
+                                >
+                                  <div className="text-destructive">Error: Invalid output data</div>
                                 </div>
                               )
                             }
@@ -263,23 +278,53 @@ export default function ChatPage() {
                               <div key={partIndex} className="mb-4">
                                 <div className="bg-muted/30 border rounded-lg p-6">
                                   <div className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                                    <span className="text-xl">📊</span>
-                                    {part.output.title}
+                                    <span className="text-xl">
+                                      {output.type === "geolocation" ? "🗺️" : 
+                                       output.type === "clinic-misdiagnosis" ? "🏥" : "📊"}
+                                    </span>
+                                    {output.title}
                                   </div>
-                                  <ChartArtifact
-                                    chartId={part.output.chartId}
-                                    title={part.output.title}
-                                    type={part.output.type}
-                                    data={part.output.data}
-                                    xAxisLabel={part.output.xAxisLabel}
-                                    yAxisLabel={part.output.yAxisLabel}
-                                    description={part.output.description}
-                                  />
+                                  {output.type === "geolocation" ? (
+                                    <GeoLocationArtifact
+                                      mapId={output.mapId}
+                                      title={output.title}
+                                      description={output.description}
+                                      diseaseType={output.diseaseType}
+                                      data={output.data}
+                                    />
+                                  ) : output.type === "clinic-misdiagnosis" ? (
+                                    <ClinicMisdiagnosisMap
+                                      mapId={output.mapId}
+                                      title={output.title}
+                                      description={output.description}
+                                    />
+                                  ) : (
+                                    <ChartArtifact
+                                      chartId={output.chartId}
+                                      title={output.title}
+                                      type={output.type}
+                                      data={output.data}
+                                      xAxisLabel={output.xAxisLabel}
+                                      yAxisLabel={output.yAxisLabel}
+                                      description={output.description}
+                                    />
+                                  )}
                                 </div>
                               </div>
                             )
                           default:
-                            return <CreatingChartSkeleton key={partIndex} />
+                            return part.type === "tool-createGeoLocation" || part.type === "tool-createClinicMisdiagnosis" ? (
+                              <div key={partIndex} className="mb-4">
+                                <div className="bg-muted/50 border rounded-lg p-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-foreground font-medium">
+                                      {part.type === "tool-createClinicMisdiagnosis" ? "Creating clinic misdiagnosis map..." : "Creating interactive map..."}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : <CreatingChartSkeleton key={partIndex} />
                         }
                       }
                       return null
@@ -302,7 +347,7 @@ export default function ChatPage() {
             <div className="max-w-4xl mx-auto mb-4">
               <div className="text-xs text-muted-foreground mb-2">Suggestions:</div>
               <Suggestions>
-                {medicalSuggestions.slice(0, 4).map((suggestion) => (
+                {medicalSuggestions.slice(0, 3).map((suggestion) => (
                   <Suggestion
                     key={suggestion}
                     suggestion={suggestion}
@@ -323,9 +368,6 @@ export default function ChatPage() {
             maxFileSize={10 * 1024 * 1024} // 10MB
           >
             <PromptInputBody>
-              <PromptInputAttachments>
-                {(attachment) => <PromptInputAttachment data={attachment} />}
-              </PromptInputAttachments>
               <PromptInputTextarea
                 name="message"
                 placeholder="Ask about patient care, upload medical documents, or get clinical insights..."
@@ -340,33 +382,14 @@ export default function ChatPage() {
                     <PromptInputActionAddAttachments label="Add medical documents" />
                   </PromptInputActionMenuContent>
                 </PromptInputActionMenu>
-
-                <PromptInputButton
-                  onClick={() => setUseMicrophone(!useMicrophone)}
-                  variant={useMicrophone ? "default" : "ghost"}
-                  title="Voice input (coming soon)"
-                >
-                  <span className="text-sm">🎤</span>
-                  <span className="sr-only">Microphone</span>
-                </PromptInputButton>
-
-                <PromptInputButton
-                  onClick={() => setUseWebSearch(!useWebSearch)}
-                  variant={useWebSearch ? "default" : "ghost"}
-                  title="Search medical databases"
-                >
-                  <span className="text-sm">🌐</span>
-                  <span className="hidden sm:inline ml-1">Search</span>
-                </PromptInputButton>
               </PromptInputTools>
 
-              <PromptInputSubmit status={status === "in_progress" ? "in_progress" : hasError ? "error" : "ready"} />
+              <PromptInputSubmit status={isLoading ? "in_progress" : hasError ? "error" : "ready"} />
             </PromptInputToolbar>
           </PromptInput>
 
           <p className="text-xs text-muted-foreground mt-3 text-center">
-            Press Enter to send • Upload medical documents • Try: "What are the symptoms of diabetes?" or "Explain
-            hypertension treatment"
+            Press Enter to send • Try: "Show me a glucose chart" or "Create a map of diabetes prevalence"
           </p>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   ClockIcon,
   MessageSquareIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 export default function DashboardPage() {
   const stats = [
@@ -44,13 +45,17 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Welcome back! Here's your healthcare overview.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <CalendarIcon className="w-4 h-4 mr-2" />
-              Schedule
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/booking">
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                Book Appointment
+              </Link>
             </Button>
-            <Button size="sm">
-              <MessageSquareIcon className="w-4 h-4 mr-2" />
-              AI Chat
+            <Button size="sm" asChild>
+              <Link href="/">
+                <MessageSquareIcon className="w-4 h-4 mr-2" />
+                AI Chat
+              </Link>
             </Button>
           </div>
         </div>
@@ -167,21 +172,29 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent">
-                <UsersIcon className="w-6 h-6" />
-                <span className="text-sm">New Patient</span>
+              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent hover:bg-primary/5" asChild>
+                <Link href="/booking">
+                  <UsersIcon className="w-6 h-6" />
+                  <span className="text-sm">New Patient</span>
+                </Link>
               </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent">
-                <CalendarIcon className="w-6 h-6" />
-                <span className="text-sm">Schedule</span>
+              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent hover:bg-primary/5" asChild>
+                <Link href="/booking">
+                  <CalendarIcon className="w-6 h-6" />
+                  <span className="text-sm">Schedule</span>
+                </Link>
               </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent">
-                <FileTextIcon className="w-6 h-6" />
-                <span className="text-sm">Clinical Note</span>
+              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent hover:bg-primary/5" asChild>
+                <Link href="/demo-clinic-map">
+                  <FileTextIcon className="w-6 h-6" />
+                  <span className="text-sm">Clinic Map</span>
+                </Link>
               </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent">
-                <MessageSquareIcon className="w-6 h-6" />
-                <span className="text-sm">AI Consult</span>
+              <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 bg-transparent hover:bg-primary/5" asChild>
+                <Link href="/">
+                  <MessageSquareIcon className="w-6 h-6" />
+                  <span className="text-sm">AI Consult</span>
+                </Link>
               </Button>
             </div>
           </CardContent>
