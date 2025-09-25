@@ -40,7 +40,7 @@ from typing import Dict, Any, List, Optional, Tuple
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
 import json
@@ -654,6 +654,90 @@ def get_reports_by_patient(patient_id: str) -> Response:
 
 
 # =============================================================================
+# VOICE INTERFACE ENDPOINTS
+# =============================================================================
+
+@app.route(f"{API_BASE}/voice-analyze", methods=["POST"])
+def voice_analyze():
+    """
+    Analyze spoken symptoms and return ICD-10 codes.
+    Endpoint specifically designed for voice input processing.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'symptoms' not in data:
+            return jsonify(create_error_response("No symptoms provided", 400))
+        
+        symptoms = data.get('symptoms', '').strip()
+        
+        if not symptoms:
+            return jsonify(create_error_response("Empty symptoms text", 400))
+        
+        # Optional: Log voice input for demo purposes
+        app.logger.info(f"🎙️ Voice Input: {symptoms}")
+        
+        # Use existing ICD-10 mapper
+        from src.icd10_mapper import ICD10Mapper
+        from src.medical_report import MedicalReportGenerator
+        
+        icd10_mapper = ICD10Mapper()
+        report_generator = MedicalReportGenerator()
+        
+        # Analyze symptoms
+        icd10_results = icd10_mapper.map_symptoms_to_icd10(symptoms)
+        
+        # Generate full medical report
+        patient_info = {
+            'name': 'Voice Patient',
+            'age': 'Not specified',
+            'input_method': 'voice',
+            'timestamp': datetime.now().isoformat()
+        }
+        conversation_history = [
+            {
+                'role': 'patient',
+                'content': symptoms,
+                'timestamp': datetime.now().isoformat()
+            }
+        ]
+        medical_report = report_generator.generate_report(
+            patient_info=patient_info, 
+            conversation_history=conversation_history,
+            symptoms_text=symptoms,
+            auto_save=False
+        )
+        
+        # Create response
+        response_data = {
+            'transcript': symptoms,
+            'icd10_results': icd10_results,
+            'medical_report': medical_report,
+            'analysis_count': len(icd10_results),
+            'processed_at': datetime.now().isoformat(),
+            'source': 'voice_input'
+        }
+        
+        return jsonify(create_success_response(response_data, "Voice analysis complete"))
+        
+    except Exception as e:
+        app.logger.error(f"Voice analysis error: {str(e)}")
+        return jsonify(create_error_response(f"Analysis failed: {str(e)}", 500))
+
+
+@app.route('/voice')
+def voice_interface():
+    """Serve the voice interface HTML page."""
+    return send_from_directory('static', 'voice.html')
+
+
+@app.route('/static/<path:filename>')
+def serve_static_files(filename):
+    """Serve static files (CSS, JS, images)."""
+    return send_from_directory('static', filename)
+
+
+# =============================================================================
 # ERROR HANDLERS
 # =============================================================================
 
@@ -710,6 +794,8 @@ if __name__ == "__main__":
    • DELETE {API_BASE}/reports/<id>     - Delete specific report
    • GET    {API_BASE}/search           - Search reports
    • GET    {API_BASE}/reports/patient/<id> - Get patient's reports
+   • POST   {API_BASE}/voice-analyze    - Voice symptom analysis
+   • GET    /voice                      - Voice interface (web UI)
    
 📚 Documentation:
    • API Documentation: docs/REST_API_DOCUMENTATION.md
