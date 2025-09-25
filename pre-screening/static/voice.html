@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ Medical Voice Assistant</title>
+    <link rel="stylesheet" href="/static/voice.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Medical Voice Assistant</h1>
+            <p>Speak your symptoms and get instant ICD-10 medical coding</p>
+        </header>
+
+        <main>
+            <!-- Voice Control Section -->
+            <section class="voice-control">
+                <button id="startBtn" class="voice-btn start">
+                    🎙️ Start Recording
+                </button>
+                <button id="stopBtn" class="voice-btn stop" disabled>
+                    ⏹️ Stop Recording
+                </button>
+                
+                <div id="status" class="status">
+                    Click "Start Recording" and speak your symptoms clearly
+                </div>
+            </section>
+
+            <!-- Transcript Section -->
+            <section id="transcript-section" class="result-section" style="display: none;">
+                <h3>📝 What You Said:</h3>
+                <div id="transcript" class="transcript-box"></div>
+            </section>
+
+            <!-- ICD-10 Results Section -->
+            <section id="results-section" class="result-section" style="display: none;">
+                <h3>🏥 ICD-10 Medical Analysis:</h3>
+                <div id="icd10-results" class="results-container"></div>
+            </section>
+
+            <!-- Medical Report Section -->
+            <section id="medical-report-section" class="result-section" style="display: none;">
+                <h3>📄 Complete Medical Report:</h3>
+                <div id="medical-report-content" class="report-container"></div>
+            </section>
+
+            <!-- Sample Demo Section -->
+            <section class="demo-section">
+                <h3>🎭 Demo Mode:</h3>
+                <p>No microphone? Try these sample symptoms:</p>
+                <button onclick="processSample('I have a severe headache with nausea and dizziness')" 
+                        class="sample-btn">Headache + Nausea</button>
+                <button onclick="processSample('chest pain and shortness of breath')" 
+                        class="sample-btn">Chest Pain</button>
+                <button onclick="processSample('persistent cough with fever for a week')" 
+                        class="sample-btn">Cough + Fever</button>
+                <button onclick="processSample('back pain and muscle stiffness')" 
+                        class="sample-btn">Back Pain</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>⚠️ <strong>Medical Disclaimer:</strong> This is a demonstration prototype only. 
+               Always consult qualified healthcare professionals for medical advice.</p>
+            <p>🔗 <a href="/api/v1/health">API Status</a> | <a href="/">Back to Main System</a></p>
+        </footer>
+    </div>
+
+    <script src="/static/voice.js"></script>
+</body>
+</html>
