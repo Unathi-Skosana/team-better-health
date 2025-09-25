@@ -49,6 +49,7 @@ import traceback
 # Import our storage system
 from report_storage import ReportStorageManager
 from medical_report import MedicalReportGenerator
+from src.google_ai_integration import GoogleAIIntegration
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -725,6 +726,60 @@ def voice_analyze():
         return jsonify(create_error_response(f"Analysis failed: {str(e)}", 500))
 
 
+@app.route(f"{API_BASE}/ai-analyze", methods=["POST"])
+def ai_analyze_symptoms():
+    """
+    Enhanced symptom analysis using Google AI.
+    Provides more detailed insights beyond basic ICD-10 mapping.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'symptoms' not in data:
+            return jsonify(create_error_response("No symptoms provided", 400))
+        
+        symptoms = data.get('symptoms', '').strip()
+        patient_context = data.get('patient_context', {})
+        
+        if not symptoms:
+            return jsonify(create_error_response("Empty symptoms text", 400))
+        
+        app.logger.info(f"🤖 AI Analysis Request: {symptoms}")
+        
+        # Initialize Google AI
+        google_ai = GoogleAIIntegration()
+        
+        # Get basic ICD-10 analysis
+        from src.icd10_mapper import ICD10Mapper
+        icd10_mapper = ICD10Mapper()
+        icd10_results = icd10_mapper.map_symptoms_to_icd10(symptoms)
+        
+        # Get AI enhancement
+        ai_analysis = google_ai.analyze_symptoms_with_ai(symptoms, patient_context)
+        
+        # Generate follow-up questions
+        follow_up_questions = google_ai.generate_patient_questions(symptoms)
+        
+        # Create comprehensive response
+        response_data = {
+            'symptoms': symptoms,
+            'icd10_analysis': {
+                'codes': icd10_results,
+                'count': len(icd10_results)
+            },
+            'ai_analysis': ai_analysis,
+            'follow_up_questions': follow_up_questions,
+            'processed_at': datetime.now().isoformat(),
+            'source': 'google_ai_enhanced'
+        }
+        
+        return jsonify(create_success_response(response_data, "AI analysis complete"))
+        
+    except Exception as e:
+        app.logger.error(f"AI analysis error: {str(e)}")
+        return jsonify(create_error_response(f"AI analysis failed: {str(e)}", 500))
+
+
 @app.route('/voice')
 def voice_interface():
     """Serve the voice interface HTML page."""
@@ -795,6 +850,7 @@ if __name__ == "__main__":
    • GET    {API_BASE}/search           - Search reports
    • GET    {API_BASE}/reports/patient/<id> - Get patient's reports
    • POST   {API_BASE}/voice-analyze    - Voice symptom analysis
+   • POST   {API_BASE}/ai-analyze      - Google AI enhanced analysis
    • GET    /voice                      - Voice interface (web UI)
    
 📚 Documentation:

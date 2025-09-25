@@ -2,50 +2,63 @@ class VoiceMedicalAssistant {
     constructor() {
         this.recognition = null;
         this.isRecording = false;
+        this.currentTranscript = '';  // Accumulate transcript during recording
         
         this.initializeElements();
-        this.initializeSpeechRecognition();
+        this.setupSpeechRecognition();
         this.bindEvents();
     }
     
     initializeElements() {
         this.startBtn = document.getElementById('startBtn');
         this.stopBtn = document.getElementById('stopBtn');
+        this.aiAnalyzeBtn = document.getElementById('aiAnalyzeBtn');
         this.status = document.getElementById('status');
         this.transcript = document.getElementById('transcript');
         this.transcriptSection = document.getElementById('transcript-section');
         this.resultsSection = document.getElementById('results-section');
         this.icd10Results = document.getElementById('icd10-results');
+        
+        // Debug logging
+        console.log('Elements initialized:', {
+            startBtn: !!this.startBtn,
+            stopBtn: !!this.stopBtn,
+            aiAnalyzeBtn: !!this.aiAnalyzeBtn
+        });
     }
     
-    initializeSpeechRecognition() {
-        // Check for speech recognition support
+    setupSpeechRecognition() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
             this.showError('Speech recognition not supported in this browser. Please use Chrome or Edge.');
-            this.startBtn.disabled = true;
-            return;
+            return false;
         }
-        
-        // Create recognition instance
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
         
-        // Configure recognition
-        this.recognition.continuous = false;          // Stop after one result
-        this.recognition.interimResults = true;       // Show interim results
-        this.recognition.lang = 'en-US';             // English language
-        this.recognition.maxAlternatives = 1;        // Only best result
+        // Extended recording settings for longer sessions
+        this.recognition.continuous = true;           // Keep recording through pauses
+        this.recognition.interimResults = true;       // Show results as you speak
+        this.recognition.maxAlternatives = 1;         // One result option
+        this.recognition.lang = 'en-US';              // English language
         
-        // Set up event handlers
+        // Bind event handlers with proper context
         this.recognition.onstart = () => this.onRecognitionStart();
         this.recognition.onresult = (event) => this.onRecognitionResult(event);
         this.recognition.onerror = (event) => this.onRecognitionError(event);
         this.recognition.onend = () => this.onRecognitionEnd();
+        
+        return true;
     }
     
     bindEvents() {
         this.startBtn.addEventListener('click', () => this.startRecording());
         this.stopBtn.addEventListener('click', () => this.stopRecording());
+        
+        // AI analysis button
+        if (this.aiAnalyzeBtn) {
+            this.aiAnalyzeBtn.addEventListener('click', () => this.analyzeWithAI());
+        }
         
         // Add keyboard shortcuts
         document.addEventListener('keydown', (event) => {
@@ -61,10 +74,15 @@ class VoiceMedicalAssistant {
     }
     
     startRecording() {
+        console.log('Start recording called');
         if (!this.recognition) {
             this.showError('Speech recognition not available');
             return;
         }
+        
+        // Reset for new recording session
+        this.currentTranscript = '';
+        this.aiAnalyzeBtn.disabled = true;
         
         try {
             this.recognition.start();
@@ -75,6 +93,7 @@ class VoiceMedicalAssistant {
     
     stopRecording() {
         if (this.recognition && this.isRecording) {
+            this.isRecording = false;  // Set flag first to prevent restart
             this.recognition.stop();
         }
     }
@@ -83,7 +102,7 @@ class VoiceMedicalAssistant {
         this.isRecording = true;
         this.startBtn.disabled = true;
         this.stopBtn.disabled = false;
-        this.updateStatus('🎙️ Listening... Speak clearly!', 'recording');
+        this.updateStatus('🎙️ Listening continuously... Speak your symptoms clearly!', 'recording');
         
         // Hide previous results
         this.transcriptSection.style.display = 'none';
@@ -104,14 +123,15 @@ class VoiceMedicalAssistant {
             }
         }
         
-        // Show interim results
+        // Show interim results while recording
         if (interimTranscript) {
             this.updateStatus(`🎙️ Hearing: "${interimTranscript}"`, 'recording');
         }
         
-        // Process final results
+        // Store final results but don't process until user stops manually
         if (finalTranscript) {
-            this.processTranscript(finalTranscript.trim());
+            this.currentTranscript = (this.currentTranscript || '') + ' ' + finalTranscript.trim();
+            this.updateStatus(`🎙️ Captured: "${this.currentTranscript.trim()}" - Keep speaking or click Stop`, 'recording');
         }
     }
     
@@ -139,7 +159,18 @@ class VoiceMedicalAssistant {
     }
     
     onRecognitionEnd() {
-        this.resetRecording();
+        this.isRecording = false;
+        this.startBtn.disabled = false;
+        this.stopBtn.disabled = true;
+        
+        // Process accumulated transcript if we have any
+        if (this.currentTranscript && this.currentTranscript.trim()) {
+            this.processTranscript(this.currentTranscript.trim());
+            // Enable AI button for further analysis
+            this.aiAnalyzeBtn.disabled = false;
+        } else {
+            this.updateStatus('Click "Start Recording" to speak your symptoms', 'ready');
+        }
     }
     
     resetRecording() {
@@ -177,6 +208,9 @@ class VoiceMedicalAssistant {
                 if (data.data.medical_report) {
                     this.showMedicalReport(data.data.medical_report);
                 }
+                
+                // Enable AI analysis button
+                this.aiAnalyzeBtn.disabled = false;
                 
                 this.updateStatus(`✅ Analysis complete - Found ${data.data.analysis_count} potential codes`, 'complete');
             } else {
@@ -322,6 +356,121 @@ class VoiceMedicalAssistant {
     
     showError(message) {
         this.updateStatus(`❌ ${message}`, 'error');
+    }
+    
+    // AI Analysis Methods
+    analyzeWithAI() {
+        const lastTranscript = this.transcript.textContent;
+        if (lastTranscript && lastTranscript !== '""' && lastTranscript.trim()) {
+            const cleanTranscript = lastTranscript.replace(/^"|"$/g, '').trim();
+            if (cleanTranscript) {
+                this.processWithGoogleAI(cleanTranscript);
+            } else {
+                this.showError('No valid transcript available. Please record your symptoms first.');
+            }
+        } else {
+            this.showError('No transcript available. Please record your symptoms first or use sample buttons.');
+        }
+    }
+    
+    async processWithGoogleAI(transcript) {
+        this.showTranscript(transcript);
+        this.updateStatus('🤖 Analyzing with Google AI...', 'processing');
+        
+        try {
+            // Send to enhanced AI endpoint
+            const response = await fetch('/api/v1/ai-analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symptoms: transcript,
+                    patient_context: {
+                        input_method: 'voice',
+                        timestamp: new Date().toISOString()
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showICD10Results(data.data.icd10_analysis.codes);
+                this.showAIInsights(data.data.ai_analysis);
+                this.showFollowUpQuestions(data.data.follow_up_questions);
+                this.updateStatus(`✅ AI Analysis complete - Found ${data.data.icd10_analysis.count} codes + AI insights`, 'complete');
+            } else {
+                this.showError(`AI Analysis failed: ${data.message}`);
+            }
+            
+        } catch (error) {
+            this.showError(`AI Network error: ${error.message}. Make sure the Flask server is running.`);
+        }
+    }
+    
+    showAIInsights(aiAnalysis) {
+        if (!aiAnalysis.success) {
+            return;
+        }
+        
+        const analysis = aiAnalysis.ai_analysis;
+        let html = '<div class="ai-insights">';
+        
+        for (const [section, content] of Object.entries(analysis)) {
+            html += `
+                <div class="ai-section">
+                    <h4>${section.replace(/\*\*/g, '').replace(/_/g, ' ').toUpperCase()}</h4>
+                    <div class="ai-content">${content}</div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        
+        // Add AI insights section to the page
+        let aiSection = document.getElementById('ai-insights-section');
+        if (!aiSection) {
+            aiSection = document.createElement('section');
+            aiSection.id = 'ai-insights-section';
+            aiSection.className = 'result-section';
+            aiSection.innerHTML = '<h3>🤖 AI Medical Insights:</h3><div id="ai-insights"></div>';
+            this.resultsSection.after(aiSection);
+        }
+        
+        document.getElementById('ai-insights').innerHTML = html;
+        aiSection.style.display = 'block';
+    }
+    
+    showFollowUpQuestions(questions) {
+        if (!questions || questions.length === 0) return;
+        
+        let html = '<div class="follow-up-questions">';
+        html += '<h4>Recommended Follow-up Questions:</h4><ul>';
+        
+        questions.forEach(question => {
+            html += `<li>${question}</li>`;
+        });
+        
+        html += '</ul></div>';
+        
+        // Add questions section
+        let questionsSection = document.getElementById('questions-section');
+        if (!questionsSection) {
+            questionsSection = document.createElement('section');
+            questionsSection.id = 'questions-section';
+            questionsSection.className = 'result-section';
+            questionsSection.innerHTML = '<h3>❓ Follow-up Questions:</h3><div id="follow-up-questions"></div>';
+            const aiSection = document.getElementById('ai-insights-section');
+            if (aiSection) {
+                aiSection.after(questionsSection);
+            } else {
+                this.resultsSection.after(questionsSection);
+            }
+        }
+        
+        document.getElementById('follow-up-questions').innerHTML = html;
+        questionsSection.style.display = 'block';
     }
     
     // Public method for demo buttons
