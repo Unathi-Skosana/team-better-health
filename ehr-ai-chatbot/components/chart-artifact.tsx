@@ -78,6 +78,46 @@ export function ChartArtifact({
   description,
   medicalContext,
 }: ChartArtifactProps) {
+  console.log("[v0] ChartArtifact rendering:", { chartId, title, type, data })
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    console.log("[v0] Invalid chart data:", data)
+
+    // If we have no chartId or title, this is likely an initial render with empty props
+    if (!chartId && !title) {
+      return (
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"></div>
+              Loading Chart...
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] flex items-center justify-center">
+              <div className="text-muted-foreground">Preparing chart data...</div>
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    // If we have chartId/title but no data, show error
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <span className="text-lg">⚠️</span>
+            Chart Error
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600 text-sm">Unable to render chart: Invalid or missing data</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   // Generate chart config based on data
   const chartConfig = data.reduce(
     (config, item, index) => {
@@ -320,9 +360,11 @@ export function ChartArtifact({
         )}
       </CardHeader>
       <CardContent>
-        <ChartContainer config={enhancedConfig} className="h-[400px] w-full">
-          {renderChart()}
-        </ChartContainer>
+        <div className="min-h-[400px] w-full">
+          <ChartContainer config={enhancedConfig} className="h-[400px] w-full">
+            {renderChart()}
+          </ChartContainer>
+        </div>
         {data[0]?.normalRange && (
           <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2">
             <div className="w-3 h-0.5 bg-green-500"></div>
