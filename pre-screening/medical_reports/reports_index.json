@@ -1,6 +1,6 @@
 {
   "created_at": "2025-09-25T10:19:43.815464",
-  "total_reports": 1,
+  "total_reports": 2,
   "reports": [
     {
       "id": "2cbbd55a",
@@ -18,7 +18,22 @@
         "R51"
       ],
       "summary": "fatigue and fever and headache"
+    },
+    {
+      "id": "ecdc8de7",
+      "created_at": "2025-09-25T10:37:57.181220",
+      "filename": "report_20250925_103757_ecdc8de7.json",
+      "filepath": "/workspaces/team-better-health/pre-screening/medical_reports/2025/report_20250925_103757_ecdc8de7.json",
+      "patient_name": "Unknown",
+      "patient_id": "N/A",
+      "has_icd10": true,
+      "icd10_codes": [
+        "I50.9",
+        "R06.02",
+        "J44.1"
+      ],
+      "summary": "shortness of breath and chest tightness"
     }
   ],
-  "last_updated": "2025-09-25T10:23:40.763973"
+  "last_updated": "2025-09-25T10:37:57.181220"
 }
